@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "goal_progresses",
+  "info": {
+    "singularName": "goal-progress",
+    "pluralName": "goal-progresses",
+    "displayName": "Goal-progress"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "goalName": {
+      "type": "string"
+    },
+    "targetValue": {
+      "type": "integer"
+    },
+    "currentValue": {
+      "type": "integer"
+    },
+    "currentstatus": {
+      "type": "enumeration",
+      "enum": [
+        "Pending, In Progress, Completed"
+      ]
+    },
+    "date": {
+      "type": "date"
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "goal_progresses"
+    }
+  }
+}

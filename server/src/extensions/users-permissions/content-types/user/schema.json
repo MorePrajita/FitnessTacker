@@ -1,0 +1,154 @@
+{
+  "kind": "collectionType",
+  "collectionName": "up_users",
+  "info": {
+    "name": "user",
+    "description": "",
+    "singularName": "user",
+    "pluralName": "users",
+    "displayName": "User"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "username": {
+      "type": "string",
+      "minLength": 3,
+      "unique": true,
+      "configurable": false,
+      "required": true
+    },
+    "email": {
+      "type": "email",
+      "minLength": 6,
+      "configurable": false,
+      "required": true
+    },
+    "provider": {
+      "type": "string",
+      "configurable": false
+    },
+    "password": {
+      "type": "password",
+      "minLength": 6,
+      "configurable": false,
+      "private": true,
+      "searchable": false
+    },
+    "resetPasswordToken": {
+      "type": "string",
+      "configurable": false,
+      "private": true,
+      "searchable": false
+    },
+    "confirmationToken": {
+      "type": "string",
+      "configurable": false,
+      "private": true,
+      "searchable": false
+    },
+    "confirmed": {
+      "type": "boolean",
+      "default": false,
+      "configurable": false
+    },
+    "blocked": {
+      "type": "boolean",
+      "default": false,
+      "configurable": false
+    },
+    "role": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.role",
+      "inversedBy": "users",
+      "configurable": false
+    },
+    "body_logs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::body-log.body-log",
+      "mappedBy": "users_permissions_user"
+    },
+    "activity_summaries": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::activity-summary.activity-summary",
+      "mappedBy": "users_permissions_user"
+    },
+    "consistency_logs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::consistency-log.consistency-log",
+      "mappedBy": "users_permissions_user"
+    },
+    "goal_progresses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::goal-progress.goal-progress",
+      "mappedBy": "users_permissions_user"
+    },
+    "activity_logs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::activity-log.activity-log",
+      "mappedBy": "users_permissions_user"
+    },
+    "food_logs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::food-log.food-log",
+      "mappedBy": "users_permissions_user"
+    },
+    "dailyCalorieIntake": {
+      "type": "integer"
+    },
+    "dailyCalorieBurn": {
+      "type": "integer"
+    },
+    "weight": {
+      "type": "decimal"
+    },
+    "targetWeight": {
+      "type": "decimal"
+    },
+    "weeklyCalorieDeficit": {
+      "type": "integer"
+    },
+    "weeklyCalorieSurplus": {
+      "type": "integer"
+    },
+    "weeklyWeightChange": {
+      "type": "decimal"
+    },
+    "daysNeeded": {
+      "type": "integer"
+    },
+    "goalStartDate": {
+      "type": "date"
+    },
+    "goalEndDate": {
+      "type": "date"
+    },
+    "height": {
+      "type": "decimal"
+    },
+    "age": {
+      "type": "integer"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "goal": {
+      "type": "string"
+    },
+    "user_profile": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::user-profile.user-profile",
+      "inversedBy": "users_permissions_user"
+    }
+  }
+}

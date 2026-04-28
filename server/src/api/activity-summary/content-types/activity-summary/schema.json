@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "activity_summaries",
+  "info": {
+    "singularName": "activity-summary",
+    "pluralName": "activity-summaries",
+    "displayName": "Activity_summary"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "date": {
+      "type": "date"
+    },
+    "caloriesBurned": {
+      "type": "integer"
+    },
+    "duration": {
+      "type": "integer"
+    },
+    "activityType": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "integer"
+    },
+    "users_permissions_user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "activity_summaries"
+    }
+  }
+}
