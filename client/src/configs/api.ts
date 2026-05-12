@@ -1,18 +1,28 @@
-// // import axios from "axios";
+// import axios from "axios";
 
-// // const api = axios.create({
-// //     baseURL: import.meta.env.VITE_STRAPI_API_URL
-// // })
+// const api = axios.create({
+//   baseURL: "http://localhost:5000/api",
+// });
+
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem("token");
+
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+
+//   return config;
+// });
 
 // // export default api;
 // import axios from "axios";
 
 // const api = axios.create({
-//   baseURL: "http://localhost:1337",
+//   baseURL: "http://localhost:5000/api",
 // });
 
 // api.interceptors.request.use((config) => {
-//   const token = window.localStorage.getItem("token");
+//   const token = localStorage.getItem("token");
 
 //   if (token) {
 //     config.headers.Authorization = `Bearer ${token}`;
@@ -24,30 +34,19 @@
 // export default api;
 import axios from "axios";
 
+// 1. Create the axios instance
 const api = axios.create({
-baseURL: "http://localhost:1337"
-
+  baseURL: "http://localhost:5000/api", 
 });
 
-// 🔥 Attach JWT token automatically
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-
+// 2. Define the setAuthToken helper
+export const setAuthToken = (token: string | null) => {
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    // This applies the token to EVERY future request made with 'api'
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common["Authorization"];
   }
-
-  return config;
-});
-
-// 🔥 Optional: clean error handling (helps debugging)
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.log("API Error:", error?.response?.data || error.message);
-    return Promise.reject(error);
-  }
-);
+};
 
 export default api;
-

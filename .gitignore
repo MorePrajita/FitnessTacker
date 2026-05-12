@@ -1,3 +1,5 @@
+node_modules/
 .env
-node_modules
-*.pdf
+*.zip
+dist/
+build/

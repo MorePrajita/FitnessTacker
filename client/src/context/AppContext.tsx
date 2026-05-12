@@ -1,563 +1,612 @@
-// // import { createContext, useContext, useEffect, useState } from "react";
-// // import { initialState, type ActivityEntry, type Credentials, type FoodEntry, type User } from "../types";
-// // import { useNavigate } from "react-router-dom";
-// // import api from "../configs/api";
-// // import toast from "react-hot-toast";
-
-
-// // const AppContext = createContext(initialState)
-
-// // export const AppProvider = ({children} : {children: React.ReactNode})=>{
-
-// //     const navigate = useNavigate()
-// //     const [user, setUser] = useState<User>(null)
-// //     const [isUserFetched, setIsUserFetched] = useState(localStorage.getItem('token') ? false : true);
-// //     const [onboardingCompleted, setOnboardingCompleted] = useState(false)
-// //     const [allFoodLogs, setAllFoodLogs] = useState<FoodEntry[]>([])
-// //     const [allActivityLogs, setAllActivityLogs] = useState<ActivityEntry[]>([])
-    
-
-// //     const signup = async (credentials: Credentials)=>{
-
-// //         try {
-// //             const {data} = await api.post('/api/auth/local/register', credentials)
-
-// //             setUser({...data.user, token: data.jwt})
-// //             if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-// //                 setOnboardingCompleted(true)
-// //             }
-// //             // localStorage.setItem('token', data.jwt)
-// //             // api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`;
-// //             localStorage.setItem("token", data.jwt);
-// // api.defaults.headers.common["Authorization"] = `Bearer ${data.jwt}`;
-
-// // await fetchUser(data.jwt);
-
-// // navigate("/app");
-
-
-// //         } catch (error: any) {
-// //             console.log(error);
-// //             toast.error(error?.response?.data?.error?.message || error?.message)
-// //         }
-// //     }
-
-// //        const login = async (credentials: Credentials)=>{
-// //         try {
-// //             const { data } = await api.post('/api/auth/local', {identifier: credentials.email, password: credentials.password})
-
-// //             setUser({...data.user, token: data.jwt})
-// //             if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-// //                 setOnboardingCompleted(true)
-// //             }
-// //             localStorage.setItem('token', data.jwt)
-// //             api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`;
-// //         } catch (error: any) {
-// //             console.log(error);
-// //             toast.error(error?.response?.data?.error?.message || error?.message)
-// //         }
-// //     }
-// //     // const login = async (credentials: Credentials)=>{
-// //     //     try {
-// //     //         const { data } = await api.post('/api/auth/local', {identifier: credentials.email, password: credentials.password})
-
-// //     //         setUser({...data.user, token: data.jwt})
-// //     //         if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-// //     //             setOnboardingCompleted(true)
-// //     //         }
-// //     //         localStorage.setItem('token', data.jwt)
-// //     //         api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`;
-// //     //     } catch (error: any) {
-// //     //         console.log(error);
-// //     //         toast.error(error?.response?.data?.error?.message || error?.message)
-// //     //     }
-// //     // }
-
-// //     const fetchUser = async (token: string)=>{
-
-// //         try {
-// //             const { data } = await api.get('/api/users/me', {headers: {Authorization: `Bearer ${token}`}})
-
-// //             setUser({...data, token})
-// //             if(data?.age && data?.weight && data?.goal){
-// //                 setOnboardingCompleted(true)
-// //             }
-// //             api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-// //         } catch (error: any) {
-// //             console.log(error);
-// //             toast.error(error?.response?.data?.error?.message || error?.message)
-// //         }
-// //         setIsUserFetched(true);
-// //     }
-
-// //     const fetchFoodLogs = async (token: string)=>{
-// //         try {
-// //             const {data} = await api.get('/api/food-logs', {headers: { Authorization: `Bearer ${token}` }})
-// //             setAllFoodLogs(data)
-
-// //         } catch (error: any) {
-// //             console.log(error);
-// //             toast.error(error?.response?.data?.error?.message || error?.message)
-// //         }
-// //     }
-
-// //     const fetchActivityLogs = async (token: string)=>{
-// //         try {
-// //             const {data} = await api.get('/api/activity-logs', {headers: { Authorization: `Bearer ${token}` }})
-// //             setAllActivityLogs(data)
-            
-// //         } catch (error: any) {
-// //             console.log(error);
-// //             toast.error(error?.response?.data?.error?.message || error?.message)
-// //         }
-// //     }
-
-// //      const logout = ()=>{
-// //         localStorage.removeItem('token')
-// //         setUser(null)
-// //         setOnboardingCompleted(false)
-// //         setAllActivityLogs([])
-// //         setAllFoodLogs([])
-// //         api.defaults.headers.common['Authorization'] = '';
-// //         navigate('/')
-// //      }
-
-// //     useEffect(()=>{
-// //         const token = localStorage.getItem('token')
-// //         if(token){
-// //             (async ()=>{
-// //                 await fetchUser(token)
-// //                 await fetchFoodLogs(token)
-// //                 await fetchActivityLogs(token)
-// //             })();
-// //         }
-// //     },[])
-
-
-// //     const value = {
-// //         user, setUser, isUserFetched, fetchUser,
-// //         signup, login, logout,
-// //         onboardingCompleted, setOnboardingCompleted,
-// //         allFoodLogs, allActivityLogs,
-// //         setAllFoodLogs, setAllActivityLogs
-// //     }
-
-// //     return <AppContext.Provider value={value}>
-// //         {children}
-// //     </AppContext.Provider>
-// // }
-
-// // export const useAppContext = ()=> useContext(AppContext)
-
-// import { createContext, useContext, useEffect, useState } from "react";
-// import { initialState, type ActivityEntry, type Credentials, type FoodEntry, type User } from "../types";
+// import { createContext, useContext, useEffect, useState, useCallback } from "react";
 // import { useNavigate } from "react-router-dom";
 // import api from "../configs/api";
+// import axios from "axios";
 // import toast from "react-hot-toast";
 
-// const AppContext = createContext(initialState)
+// const AppContext = createContext<any>(null);
 
-// export const AppProvider = ({children} : {children: React.ReactNode})=>{
+// export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+//   const navigate = useNavigate();
+//   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem("token"));
+//   const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+//   const [user, setUser] = useState<any>(null);
+//   const [profile, setProfile] = useState<any>(null);
+//   const [isUserFetched, setIsUserFetched] = useState(false);
+//   const [allFoodLogs, setAllFoodLogs] = useState<any[]>([]);
+//   const [allActivityLogs, setAllActivityLogs] = useState<any[]>([]);
 
-//     const navigate = useNavigate()
-//     const [user, setUser] = useState<User>(null)
-//     const [isUserFetched, setIsUserFetched] = useState(localStorage.getItem('token') ? false : true);
-//     const [onboardingCompleted, setOnboardingCompleted] = useState(false)
-//     const [allFoodLogs, setAllFoodLogs] = useState<FoodEntry[]>([])
-//     const [allActivityLogs, setAllActivityLogs] = useState<ActivityEntry[]>([])
-//     const [profile, setProfile] = useState<any>(null);
+//   const onboardingCompleted = user?.onboardingCompleted || !!profile;
 
-    
+//   // Helper to get today's date in YYYY-MM-DD format
+//   const getTodayStr = () => new Date().toISOString().split("T")[0];
 
-//     const signup = async (credentials: Credentials)=>{
-
-//         try {
-//             const {data} = await api.post('/api/auth/local/register', credentials)
-
-//             setUser({...data.user, token: data.jwt})
-//             if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-//                 setOnboardingCompleted(true)
-//             }
-
-//             localStorage.setItem("token", data.jwt);
-//             api.defaults.headers.common["Authorization"] = `Bearer ${data.jwt}`;
-
-//             await fetchUser(data.jwt);
-
-//             navigate("/app");
-
-//         } catch (error: any) {
-//             console.log(error);
-//             toast.error(error?.response?.data?.error?.message || error?.message)
-//         }
+//   const setAuthSession = (token: string | null, userData: any = null) => {
+//     if (token) {
+//       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+//       localStorage.setItem("token", token);
+//       if (userData) {
+//         localStorage.setItem("user", JSON.stringify(userData));
+//       }
+//     } else {
+//       delete api.defaults.headers.common["Authorization"];
+//       localStorage.clear();
 //     }
+//   };
 
-//     const login = async (credentials: Credentials)=>{
-//         try {
-//             const { data } = await api.post('/api/auth/local', {
-//                 identifier: credentials.email,
-//                 password: credentials.password
-//             })
-
-//             setUser({...data.user, token: data.jwt})
-//             if(data?.user?.age && data?.user?.weight && data?.user?.goal){
-//                 setOnboardingCompleted(true)
-//             }
-
-//             localStorage.setItem('token', data.jwt)
-//             api.defaults.headers.common['Authorization'] = `Bearer ${data.jwt}`;
-
-//             // 🔥 IMPORTANT: fetch merged data
-//             await fetchUser(data.jwt);
-
-//         } catch (error: any) {
-//             console.log(error);
-//             toast.error(error?.response?.data?.error?.message || error?.message)
-//         }
-//     }
-
-//     // ✅ FIXED FUNCTION (ONLY CHANGE)
-//     // const fetchUser = async (token: string)=>{
-
-//     //     try {
-//     //         // 1. Get auth user
-//     //         const { data: userData } = await api.get('/api/users/me', {
-//     //             headers: { Authorization: `Bearer ${token}` }
-//     //         });
-
-//     //         // 2. Get profile (calculated data)
-//     //         const { data: profileRes } = await api.get('/api/user-profiles/me', {
-//     //             headers: { Authorization: `Bearer ${token}` }
-//     //         });
-
-//     //         const profile = profileRes?.data?.data;
-
-//     //         // 3. Merge both
-//     //         const mergedUser = {
-//     //             ...userData,
-//     //             ...profile,
-//     //             token
-//     //         };
-
-//     //         setUser(mergedUser);
-
-//     //         if(mergedUser?.age && mergedUser?.weight && mergedUser?.goal){
-//     //             setOnboardingCompleted(true)
-//     //         }
-
-//     //         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-
-//     //     } catch (error: any) {
-//     //         console.log(error);
-//     //         toast.error(error?.response?.data?.error?.message || error?.message)
-//     //     }
-
-//     //     setIsUserFetched(true);
-//     // }
-// const fetchUser = async (token: string)=>{
-
+//   const fetchProfile = useCallback(async () => {
 //     try {
-//         const { data: userData } = await api.get('/api/users/me', {
-//             headers: { Authorization: `Bearer ${token}` }
-//         });
+//       // Changed from /user/profile to /profile to match our backend routes
+//       const { data } = await api.get("/profile");
+//       setProfile(data);
+//       if (data) {
+//         setUser((prev: any) => ({ ...prev, onboardingCompleted: true }));
+//       }
+//       return data;
+//     } catch (err) {
+//       setProfile(null);
+//       return null;
+//     }
+//   }, []);
 
-//         const { data: profileRes } = await api.get('/api/user-profiles/me', {
-//             headers: { Authorization: `Bearer ${token}` }
-//         });
+//   const fetchDailyLogs = useCallback(async () => {
+//     const today = getTodayStr();
+//     try {
+//       // Fetching both food and activities for the current day
+//       const [foodRes, activityRes] = await Promise.all([
+//         api.get(`/food-log/${today}`),
+//         api.get(`/activity-logs/${today}`),
+//       ]);
+//       setAllFoodLogs(foodRes.data);
+//       setAllActivityLogs(activityRes.data);
+//     } catch (err) {
+//       console.error("Error fetching daily logs:", err);
+//     }
+//   }, []);
 
-//         const profile = profileRes?.data?.data;
+//   // Centralized function to refresh all app data
+//   // Inside AppContext.tsx
+// const refreshAppData = async (passedToken?: string) => {
+//   // Use the passed token or fallback to the one in localStorage
+//   const token = passedToken || localStorage.getItem("token");
+  
+//   if (!token) return;
 
-//         // ✅ THIS WAS MISSING
-//         setProfile(profile);
+//   const config = {
+//     headers: { Authorization: `Bearer ${token}` }
+//   };
 
-//         const mergedUser = {
-//             ...userData,
-//             ...profile,
-//             token
-//         };
+//   try {
+//     // Example of fetching logs with the explicit header
+//     const logsResponse = await axios.get(`http://localhost:5000/api/activity-logs/${new Date().toISOString().split('T')[0]}`, config);
+//     // ... rest of your fetching logic using 'config'
+    
+//   } catch (error) {
+//     console.error("Error fetching daily logs:", error);
+//   }
+// };
+//   // const refreshAppData = useCallback(async () => {
+//   //   await Promise.all([fetchProfile(), fetchDailyLogs()]);
+//   // }, [fetchProfile, fetchDailyLogs]);
 
-//         setUser(mergedUser);
+  
+// const signup = async (userData: any) => {
+//   try {
+//     // Ensure we are sending 'name' to match the backend requirement
+//     const res = await axios.post("http://localhost:5000/api/auth/register", {
+//       name: userData.name, 
+//       email: userData.email,
+//       password: userData.password
+//     });
+    
+//     console.log("Full Response Data:", res.data);
 
-//         if(mergedUser?.age && mergedUser?.weight && mergedUser?.goal){
-//             setOnboardingCompleted(true)
-//         }
+//     // FIX: Access token directly from res.data as per your previous logs
+//     if (res.data && res.data.token) {
+//       const tokenFromServer = res.data.token;
+//       const userFromServer = res.data.user;
 
-//         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+//       // 1. SAVE TO LOCAL STORAGE
+//       localStorage.setItem("token", tokenFromServer);
 
+//       // 2. Update State
+//       setToken(tokenFromServer);
+//       setUser(userFromServer);
+//       setIsLoggedIn(true);
+
+//       // 3. Set Axios Headers for future requests
+//       axios.defaults.headers.common["Authorization"] = `Bearer ${tokenFromServer}`;
+
+//       return res.data; 
+//     } else {
+//       console.error("Token missing from backend response structure");
+//       return null;
+//     }
+//   } catch (error: any) {
+//     // THIS WAS MISSING OR BROKEN
+//     console.error("Signup Error:", error.response?.data?.message || error.message);
+//     throw error; 
+//   }
+// };
+
+//   // const signup = async (credentials: any) => {
+//   //   try {
+//   //     const { data } = await api.post("/auth/register", credentials);
+//   //     setAuthSession(data.token, data.user);
+//   //     setUser(data.user);
+//   //     toast.success("Account created!");
+//   //     navigate("/onboarding");
+//   //   } catch (error: any) {
+//   //     toast.error(error.response?.data?.message || "Signup failed");
+//   //   }
+//   // };
+
+//   const login = async (credentials: any) => {
+//     try {
+//       const { data } = await api.post("/auth/login", credentials);
+//       setAuthSession(data.token, data.user);
+//       setUser(data.user);
+
+//       if (data.user.onboardingCompleted) {
+//         toast.success("Welcome back!");
+//         // Refresh profile and logs before navigating to dashboard
+//         await refreshAppData();
+//         navigate("/app");
+//       } else {
+//         toast.success("Please complete your profile!");
+//         navigate("/onboarding");
+//       }
 //     } catch (error: any) {
-//         console.log(error);
-//         toast.error(error?.response?.data?.error?.message || error?.message)
+//       toast.error(error.response?.data?.message || "Login failed");
 //     }
+//   };
 
-//     setIsUserFetched(true);
-// }
+//   const logout = () => {
+//     setAuthSession(null);
+//     setUser(null);
+//     setProfile(null);
+//     setAllFoodLogs([]);
+//     setAllActivityLogs([]);
+//     navigate("/");
+//   };
 
-//     const fetchFoodLogs = async (token: string)=>{
-//         try {
-//             const {data} = await api.get('/api/food-logs', {
-//                 headers: { Authorization: `Bearer ${token}` }
-//             })
-//             setAllFoodLogs(data)
+//   useEffect(() => {
+//     const init = async () => {
+//       const savedToken = localStorage.getItem("token");
+//       const savedUser = localStorage.getItem("user");
 
-//         } catch (error: any) {
-//             console.log(error);
-//             toast.error(error?.response?.data?.error?.message || error?.message)
-//         }
-//     }
+//       if (savedToken && savedUser) {
+//         api.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
+//         setUser(JSON.parse(savedUser));
+//         await refreshAppData();
+//       }
+//       setIsUserFetched(true);
+//     };
+//     init();
+//   }, [refreshAppData]);
 
-//     const fetchActivityLogs = async (token: string)=>{
-//         try {
-//             const {data} = await api.get('/api/activity-logs', {
-//                 headers: { Authorization: `Bearer ${token}` }
-//             })
-//             setAllActivityLogs(data)
-            
-//         } catch (error: any) {
-//             console.log(error);
-//             toast.error(error?.response?.data?.error?.message || error?.message)
-//         }
-//     }
-
-//     const logout = ()=>{
-//         localStorage.removeItem('token')
-//         setUser(null)
-//         setOnboardingCompleted(false)
-//         setAllActivityLogs([])
-//         setAllFoodLogs([])
-//         api.defaults.headers.common['Authorization'] = '';
-//         navigate('/')
-//     }
-
-//     useEffect(()=>{
-//         const token = localStorage.getItem('token')
-//         if(token){
-//             (async ()=>{
-//                 await fetchUser(token)
-//                 await fetchFoodLogs(token)
-//                 await fetchActivityLogs(token)
-//             })();
-//         }
-//     },[])
-
-//   const value = {
-//     user,
-//     setUser,
-//     profile,        // ✅ ADD THIS
-//     setProfile,     // ✅ ADD THIS
-//     isUserFetched,
-//     fetchUser,
-//     signup,
-//     login,
-//     logout,
-//     onboardingCompleted,
-//     setOnboardingCompleted,
-//     allFoodLogs,
-//     allActivityLogs,
-//     setAllFoodLogs,
-//     setAllActivityLogs
-// }
-
-
-//     return <AppContext.Provider value={value}>
-//         {children}
+//   return (
+//     <AppContext.Provider
+//       value={{
+//         user,
+//         profile,
+//         onboardingCompleted,
+//         isUserFetched,
+//         allFoodLogs,
+//         allActivityLogs,
+//         isLoggedIn,
+//         setIsLoggedIn,
+//         setToken,
+//         setAllFoodLogs,
+//         setAllActivityLogs,
+//         fetchProfile,
+//         fetchDailyLogs,
+//         refreshAppData,
+//         signup,
+//         login,
+//         logout,
+//       }}
+//     >
+//       {children}
 //     </AppContext.Provider>
-// }
+//   );
+// };
 
-// export const useAppContext = ()=> useContext(AppContext)
-import { createContext, useContext, useEffect, useState } from "react";
-import { initialState } from "../types"; // keep if exists OR remove typing
+// export const useAppContext = () => useContext(AppContext);
+
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../configs/api";
+import axios from "axios";
 import toast from "react-hot-toast";
 
-const AppContext = createContext<any>(initialState);
+const AppContext = createContext<any>(null);
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
-
   const navigate = useNavigate();
-
+  
+  // --- STATE ---
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem("token"));
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [isUserFetched, setIsUserFetched] = useState(
-    localStorage.getItem("token") ? false : true
-  );
-
-  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [isUserFetched, setIsUserFetched] = useState(false);
   const [allFoodLogs, setAllFoodLogs] = useState<any[]>([]);
   const [allActivityLogs, setAllActivityLogs] = useState<any[]>([]);
 
-  /* ================= AUTH ================= */
+  // --- HELPERS ---
+  const getTodayStr = () => new Date().toISOString().split("T")[0];
 
-  const signup = async (credentials: any) => {
+  const setAuthSession = useCallback((token: string | null, userData: any = null) => {
+    if (token) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("token", token);
+      if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+      }
+      setIsLoggedIn(true);
+    } else {
+      delete api.defaults.headers.common["Authorization"];
+      delete axios.defaults.headers.common["Authorization"];
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setIsLoggedIn(false);
+      setUser(null);
+      setProfile(null);
+    }
+  }, []);
+
+  // --- DATA FETCHING ---
+  const fetchProfile = useCallback(async () => {
     try {
-      const { data } = await api.post("/api/auth/local/register", credentials);
+      const { data } = await api.get("/profile");
+      setProfile(data);
+      return data;
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      setProfile(null);
+      return null;
+    }
+  }, []);
 
-      localStorage.setItem("token", data.jwt);
-      api.defaults.headers.common["Authorization"] = `Bearer ${data.jwt}`;
+const fetchDailyLogs = useCallback(async () => {
+  try {
+    const foodRes = await api.get("/food-log");
+const activityRes = await api.get("/activity-logs");
+    // const [foodRes, activityRes] = await Promise.all([
+    //   api.get("/food-log"),
+    //   api.get("/activity-logs"),
+    // ]);
 
-      await fetchUser(data.jwt);
+    console.log("Food Logs:", foodRes.data);
+    console.log("Activity Logs:", activityRes.data);
 
-      navigate("/app");
+    setAllFoodLogs(
+      Array.isArray(foodRes.data)
+        ? foodRes.data
+        : foodRes.data.logs || []
+    );
+
+    setAllActivityLogs(
+      Array.isArray(activityRes.data)
+        ? activityRes.data
+        : activityRes.data.logs || []
+    );
+
+  } catch (err: any) {
+    console.error(
+      "Daily logs fetch error:",
+      err.response?.status,
+      err.message
+    );
+
+    setAllFoodLogs([]);
+    setAllActivityLogs([]);
+  }
+}, []);
+
+  // Wrap refreshAppData in useCallback to stop the infinite loop
+  const refreshAppData = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    // Ensure headers are set before fetching
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    
+    await Promise.all([fetchProfile(), fetchDailyLogs()]);
+  }, [fetchProfile, fetchDailyLogs]);
+
+  // --- AUTH ACTIONS ---
+  const signup = async (userData: any) => {
+    try {
+      const res = await axios.post("http://localhost:5000/api/auth/register", {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password
+      });
+
+      if (res.data?.token) {
+        setAuthSession(res.data.token, res.data.user);
+        toast.success("Account created!");
+        navigate("/onboarding");
+      }
     } catch (error: any) {
-      console.log(error);
-      toast.error(error?.response?.data?.error?.message || error?.message);
+      toast.error(error.response?.data?.message || "Signup failed");
+      throw error;
     }
   };
 
   const login = async (credentials: any) => {
     try {
-      const { data } = await api.post("/api/auth/local", {
-        identifier: credentials.email,
-        password: credentials.password,
-      });
+      const { data } = await api.post("/auth/login", credentials);
+      setAuthSession(data.token, data.user);
 
-      localStorage.setItem("token", data.jwt);
-      api.defaults.headers.common["Authorization"] = `Bearer ${data.jwt}`;
-
-      await fetchUser(data.jwt);
-
+      if (data.user.role === 'admin') {
+        toast.success("Welcome, Admin");
+        navigate("/admin");
+      } else if (data.user.onboardingCompleted) {
+        await refreshAppData();
+        toast.success("Welcome back!");
+        navigate("/app");
+      } else {
+        navigate("/onboarding");
+      }
     } catch (error: any) {
-      console.log(error);
-      toast.error(error?.response?.data?.error?.message || error?.message);
+      toast.error(error.response?.data?.message || "Login failed");
     }
   };
 
-  /* ================= FETCH USER ================= */
-
-  const fetchUser = async (token: string) => {
-    try {
-      // ✅ user
-      const { data: userData } = await api.get("/api/users/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // ✅ profile
-      let profileData = null;
-
-try {
-  const { data: profileRes } = await api.get("/api/user-profiles", {
-    params: {
-      filters: {
-        users_permissions_user: userData.id,
-      },
-      populate: "*",
-    },
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  profileData = profileRes?.data?.[0] || null;
-
-} catch (err) {
-  console.log("No profile found yet");
-}
-
-      // let profileData = null;
-
-      // try {
-      //   const { data: profileRes } = await api.get("/api/user-profiles/me", {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //   });
-
-      //   // 🔥 IMPORTANT FIX
-      //   profileData = profileRes?.data || null;
-
-      // } catch (err) {
-      //   console.log("No profile found yet");
-      // }
-
-      setProfile(profileData);
-
-      const mergedUser = {
-  ...userData,
-  profile: profileData,
-  token,
-};
-
-
-      setUser(mergedUser);
-
-     if (
-  profileData?.height &&
-  profileData?.weight &&
-  userData?.age
-) {
-  setOnboardingCompleted(true);
-} else {
-  setOnboardingCompleted(false);
-}
-
-
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-    } catch (error: any) {
-      console.log(error);
-      toast.error(error?.response?.data?.error?.message || error?.message);
-    }
-
-    setIsUserFetched(true);
-  };
-
-  /* ================= LOGS ================= */
-
-  const fetchFoodLogs = async (token: string) => {
-    try {
-      const { data } = await api.get("/api/food-logs", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAllFoodLogs(data);
-    } catch (error: any) {
-      console.log(error);
-    }
-  };
-
-  const fetchActivityLogs = async (token: string) => {
-    try {
-      const { data } = await api.get("/api/activity-logs", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAllActivityLogs(data);
-    } catch (error: any) {
-      console.log(error);
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setUser(null);
-    setProfile(null);
-    setOnboardingCompleted(false);
-    setAllActivityLogs([]);
+  const logout = useCallback(() => {
+    setAuthSession(null);
     setAllFoodLogs([]);
-    api.defaults.headers.common["Authorization"] = "";
+    setAllActivityLogs([]);
     navigate("/");
-  };
+  }, [setAuthSession, navigate]);
 
+  // --- INITIALIZATION ---
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const init = async () => {
+      const savedToken = localStorage.getItem("token");
+      const savedUser = localStorage.getItem("user");
 
-    if (token) {
-      (async () => {
-        await fetchUser(token);
-        await fetchFoodLogs(token);
-        await fetchActivityLogs(token);
-      })();
-    }
-  }, []);
+      if (savedToken && savedUser) {
+        try {
+          setUser(JSON.parse(savedUser));
+          await refreshAppData();
+        } catch (e) {
+          logout(); // Clear corrupted storage
+        }
+      }
+      setIsUserFetched(true);
+    };
+    init();
+  }, [refreshAppData, logout]); // refreshAppData is now stable
 
-  const value = {
+  // --- MEMOIZED CONTEXT VALUE ---
+  const value = useMemo(() => ({
     user,
     profile,
+    onboardingCompleted: user?.onboardingCompleted || !!profile,
     isUserFetched,
-    fetchUser,
+    allFoodLogs,
+    allActivityLogs,
+    isLoggedIn,
+    setAllFoodLogs,
+    setAllActivityLogs,
+    fetchProfile,
+    fetchDailyLogs,
+    refreshAppData,
     signup,
     login,
     logout,
-    onboardingCompleted,
-    allFoodLogs,
-    allActivityLogs,
-  };
+  }), [user, profile, isUserFetched, allFoodLogs, allActivityLogs, isLoggedIn, fetchProfile, fetchDailyLogs, refreshAppData, logout]);
 
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={value}>
+      {children}
+    </AppContext.Provider>
+  );
 };
 
 export const useAppContext = () => useContext(AppContext);
+
+// import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
+// import { useNavigate } from "react-router-dom";
+// import api from "../configs/api";
+// import axios from "axios";
+// import toast from "react-hot-toast";
+
+// const AppContext = createContext<any>(null);
+
+// export const AppProvider = ({ children }: { children: React.ReactNode }) => {
+//   const navigate = useNavigate();
+  
+//   // --- STATE ---
+//   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(!!localStorage.getItem("token"));
+//   const [user, setUser] = useState<any>(null);
+//   const [profile, setProfile] = useState<any>(null);
+//   const [isUserFetched, setIsUserFetched] = useState(false);
+//   const [allFoodLogs, setAllFoodLogs] = useState<any[]>([]);
+//   const [allActivityLogs, setAllActivityLogs] = useState<any[]>([]);
+
+//   // --- HELPERS ---
+//   const setAuthSession = useCallback((token: string | null, userData: any = null) => {
+//     if (token) {
+//       api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+//       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+//       localStorage.setItem("token", token);
+//       if (userData) {
+//         localStorage.setItem("user", JSON.stringify(userData));
+//         setUser(userData);
+//       }
+//       setIsLoggedIn(true);
+//     } else {
+//       delete api.defaults.headers.common["Authorization"];
+//       delete axios.defaults.headers.common["Authorization"];
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       setIsLoggedIn(false);
+//       setUser(null);
+//       setProfile(null);
+//     }
+//   }, []);
+
+//   // --- DATA FETCHING ---
+//   const fetchProfile = useCallback(async () => {
+//     try {
+//       const { data } = await api.get("/profile");
+//       setProfile(data);
+//       return data;
+//     } catch (err) {
+//       console.error("Profile fetch error:", err);
+//       setProfile(null);
+//       return null;
+//     }
+//   }, []);
+
+// const fetchDailyLogs = useCallback(async () => {
+//     try {
+//       // ✅ Use exactly what matches your backend app.use() names
+//       const [foodRes, activityRes] = await Promise.all([
+//         api.get("/food-log"),      // Hits the new router.get("/")
+//         api.get("/activity-logs"), // Make sure your activity backend has router.get("/") too!
+//       ]);
+
+//       console.log("Context Data Fetched Successfully");
+      
+//       setAllFoodLogs(Array.isArray(foodRes.data) ? foodRes.data : []);
+//       setAllActivityLogs(Array.isArray(activityRes.data) ? activityRes.data : []);
+      
+//     } catch (err: any) {
+//       console.error("Fetch Error:", err.response?.status, err.message);
+//       // If still 404, check if your backend uses app.use('/api/food-logs', ...) with an 's'
+//     }
+//   }, []);
+
+//   // const fetchDailyLogs = useCallback(async () => {
+//   //   try {
+//   //     // ✅ FIX: Removed /${today}. Fetch the general list for the user.
+//   //     // Your backend should return logs belonging to the logged-in user.
+//   //     const [foodRes, activityRes] = await Promise.all([
+//   //       api.get("/food-log"), 
+//   //       api.get("/activity-logs"),
+//   //     ]);
+
+//   //     console.log("Context: Food data received:", foodRes.data);
+      
+//   //     // Handle potential object wrapping (e.g. { success: true, data: [...] })
+//   //     setAllFoodLogs(Array.isArray(foodRes.data) ? foodRes.data : foodRes.data.logs || []);
+//   //     setAllActivityLogs(Array.isArray(activityRes.data) ? activityRes.data : activityRes.data.logs || []);
+      
+//   //   } catch (err) {
+//   //     console.error("Daily logs fetch error:", err);
+//   //   }
+//   // }, []);
+
+//   const refreshAppData = useCallback(async () => {
+//     const token = localStorage.getItem("token");
+//     if (!token) return;
+
+//     // Ensure headers are current
+//     api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    
+//     await Promise.all([fetchProfile(), fetchDailyLogs()]);
+//   }, [fetchProfile, fetchDailyLogs]);
+
+//   // --- AUTH ACTIONS ---
+//   const signup = async (userData: any) => {
+//     try {
+//       const res = await axios.post("http://localhost:5000/api/auth/register", {
+//         name: userData.name,
+//         email: userData.email,
+//         password: userData.password
+//       });
+
+//       if (res.data?.token) {
+//         setAuthSession(res.data.token, res.data.user);
+//         toast.success("Account created!");
+//         navigate("/onboarding");
+//       }
+//     } catch (error: any) {
+//       toast.error(error.response?.data?.message || "Signup failed");
+//       throw error;
+//     }
+//   };
+
+//   const login = async (credentials: any) => {
+//     try {
+//       const { data } = await api.post("/auth/login", credentials);
+//       setAuthSession(data.token, data.user);
+
+//       if (data.user.role === 'admin') {
+//         toast.success("Welcome, Admin");
+//         navigate("/admin");
+//       } else if (data.user.onboardingCompleted) {
+//         // ✅ Ensure headers are set before we call refresh
+//         api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+//         await refreshAppData();
+//         toast.success("Welcome back!");
+//         navigate("/app");
+//       } else {
+//         navigate("/onboarding");
+//       }
+//     } catch (error: any) {
+//       toast.error(error.response?.data?.message || "Login failed");
+//     }
+//   };
+
+//   const logout = useCallback(() => {
+//     setAuthSession(null);
+//     setAllFoodLogs([]);
+//     setAllActivityLogs([]);
+//     navigate("/");
+//   }, [setAuthSession, navigate]);
+
+//   // --- INITIALIZATION ---
+//   useEffect(() => {
+//     const init = async () => {
+//       const savedToken = localStorage.getItem("token");
+//       const savedUser = localStorage.getItem("user");
+
+//       if (savedToken && savedUser) {
+//         try {
+//           api.defaults.headers.common["Authorization"] = `Bearer ${savedToken}`;
+//           setUser(JSON.parse(savedUser));
+//           await refreshAppData();
+//         } catch (e) {
+//           console.error("Init error:", e);
+//           logout(); 
+//         }
+//       }
+//       setIsUserFetched(true);
+//     };
+//     init();
+//   }, [refreshAppData, logout]);
+
+//   const value = useMemo(() => ({
+//     user,
+//     profile,
+//     onboardingCompleted: user?.onboardingCompleted || !!profile,
+//     isUserFetched,
+//     allFoodLogs,
+//     allActivityLogs,
+//     isLoggedIn,
+//     setAllFoodLogs,
+//     setAllActivityLogs,
+//     fetchProfile,
+//     fetchDailyLogs,
+//     refreshAppData,
+//     signup,
+//     login,
+//     logout,
+//   }), [user, profile, isUserFetched, allFoodLogs, allActivityLogs, isLoggedIn, fetchProfile, fetchDailyLogs, refreshAppData, logout]);
+
+//   return (
+//     <AppContext.Provider value={value}>
+//       {children}
+//     </AppContext.Provider>
+//   );
+// };
+
+// export const useAppContext = () => useContext(AppContext);

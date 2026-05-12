@@ -1,123 +1,6 @@
-// import { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import {
-//   LineChart,
-//   Line,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-//   Tooltip,
-//   Legend,
-//   ResponsiveContainer,
-//   ReferenceLine,
-// } from "recharts";
-
-// type ActivityPoint = {
-//   date?: string;
-//   steps?: number;
-//   calories?: number;
-//   activeMinutes?: number;
-// };
-
-// export default function ActivityChart() {
-//   const navigate = useNavigate();
-//   const [data, setData] = useState<ActivityPoint[]>([]);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         const res = await fetch("http://localhost:1337/api/reports/activity");
-//         const json = await res.json();
-//         setData(json.trend || []);
-//       } catch (err) {
-//         console.error(err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-//     fetchData();
-//   }, []);
-
-//   if (loading) return <div className="p-4">Loading chart...</div>;
-
-//   const latest = data[data.length - 1];
-
-//   return (
-//     <div className="space-y-4">
-//       <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
-//         <div>
-//           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Activity Report</h2>
-//           <p className="text-sm text-slate-500 dark:text-slate-400">
-//             Track how your steps, calories burned, and active minutes change over time.
-//           </p>
-//         </div>
-//         <button
-//           onClick={() => navigate("/app/reports")}
-//           className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-700"
-//         >
-//           Back to Reports
-//         </button>
-//       </div>
-
-//       {latest && (
-//         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-//           <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900">
-//             <p className="text-sm text-slate-500">Latest Steps</p>
-//             <p className="text-2xl font-semibold text-slate-800 dark:text-white">{latest.steps ?? 0}</p>
-//           </div>
-//           <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900">
-//             <p className="text-sm text-slate-500">Latest Calories Burned</p>
-//             <p className="text-2xl font-semibold text-slate-800 dark:text-white">{latest.calories ?? 0} kcal</p>
-//           </div>
-//           <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900">
-//             <p className="text-sm text-slate-500">Latest Active Minutes</p>
-//             <p className="text-2xl font-semibold text-slate-800 dark:text-white">{latest.activeMinutes ?? 0} min</p>
-//           </div>
-//         </div>
-//       )}
-
-//       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
-//         <div style={{ width: "100%", height: 420 }}>
-//           <ResponsiveContainer width="100%" height="100%">
-//             <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-//               <CartesianGrid strokeDasharray="3 3" />
-//               <XAxis dataKey="date" />
-//               <YAxis />
-//               <Tooltip
-//                 labelFormatter={(label) => `Date: ${label}`}
-//                 formatter={(value, name) => {
-//                   if (name === "steps") return [`${value} steps`, "Steps"];
-//                   if (name === "calories") return [`${value} kcal`, "Calories Burned"];
-//                   if (name === "activeMinutes") return [`${value} min`, "Active Minutes"];
-//                   return [value, name];
-//                 }}
-//               />
-//               <Legend
-//                 formatter={(value) => {
-//                   if (value === "steps") return "Steps";
-//                   if (value === "calories") return "Calories Burned";
-//                   if (value === "activeMinutes") return "Active Minutes";
-//                   return value;
-//                 }}
-//               />
-//               <ReferenceLine y={8000} stroke="#94a3b8" strokeDasharray="4 4" label="8k Steps Goal" />
-//               <Line type="monotone" dataKey="steps" stroke="#4f46e5" strokeWidth={2} dot={{ r: 3 }} />
-//               <Line type="monotone" dataKey="calories" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
-//               <Line type="monotone" dataKey="activeMinutes" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
-//             </LineChart>
-//           </ResponsiveContainer>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../configs/api"; // Adjust this path to your axios instance
 import {
   LineChart,
   Line,
@@ -131,9 +14,9 @@ import {
 } from "recharts";
 
 type ActivityPoint = {
-  date?: string;
-  steps?: number;
-  calories?: number;
+  date: string;
+  caloriesBurned: number;
+  steps?: number; // Optional until you add step tracking to your model
   activeMinutes?: number;
 };
 
@@ -145,11 +28,11 @@ export default function ActivityChart() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("http://localhost:1337/api/reports/activity");
-        const json = await res.json();
-        setData(Array.isArray(json.trend) ? json.trend : []);
+        // Backend returns: { trend: [ {date, caloriesBurned}, ... ] }
+        const res = await api.get("/reports/activity");
+        setData(Array.isArray(res.data.trend) ? res.data.trend : []);
       } catch (err) {
-        console.error(err);
+        console.error("Error loading activity chart:", err);
         setData([]);
       } finally {
         setLoading(false);
@@ -158,7 +41,14 @@ export default function ActivityChart() {
     fetchData();
   }, []);
 
-  if (loading) return <div className="p-4">Loading chart...</div>;
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center text-slate-500">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
+        Loading Activity Data...
+      </div>
+    );
+  }
 
   if (!data.length) {
     return (
@@ -166,20 +56,17 @@ export default function ActivityChart() {
         <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
           <div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Activity Report</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Track how your steps, calories burned, and active minutes change over time.
-            </p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">No logs found for the selected period.</p>
           </div>
           <button
             onClick={() => navigate("/app/reports")}
-            className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-700"
+            className="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-700 transition-colors"
           >
             Back to Reports
           </button>
         </div>
-
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 text-center text-slate-500">
-          No activity data available yet.
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-12 text-center text-slate-500">
+          Start logging your exercises to see your activity trends!
         </div>
       </div>
     );
@@ -188,12 +75,12 @@ export default function ActivityChart() {
   const latest = data[data.length - 1];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Activity Report</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Track how your steps, calories burned, and active minutes change over time.
+            Real-time tracking of your calories burned from logged activities.
           </p>
         </div>
         <button
@@ -204,42 +91,52 @@ export default function ActivityChart() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900">
-          <p className="text-sm text-slate-500">Latest Steps</p>
-          <p className="text-2xl font-semibold text-slate-800 dark:text-white">{latest.steps ?? 0}</p>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Most Recent Session</p>
+          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+            {latest.caloriesBurned} <span className="text-sm font-normal text-slate-400">kcal burned</span>
+          </p>
         </div>
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900">
-          <p className="text-sm text-slate-500">Latest Calories Burned</p>
-          <p className="text-2xl font-semibold text-slate-800 dark:text-white">{latest.calories ?? 0} kcal</p>
-        </div>
-        <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900">
-          <p className="text-sm text-slate-500">Latest Active Minutes</p>
-          <p className="text-2xl font-semibold text-slate-800 dark:text-white">{latest.activeMinutes ?? 0} min</p>
+        <div className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 bg-white dark:bg-slate-900 shadow-sm">
+          <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Logged Date</p>
+          <p className="text-2xl font-bold text-slate-800 dark:text-white">{latest.date}</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
-        <div style={{ width: "100%", height: 420 }}>
+      {/* Chart */}
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div style={{ width: "100%", height: 400 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip
-                labelFormatter={(label) => `Date: ${label}`}
-                formatter={(value, name) => {
-                  if (name === "steps") return [`${value} steps`, "Steps"];
-                  if (name === "calories") return [`${value} kcal`, "Calories Burned"];
-                  if (name === "activeMinutes") return [`${value} min`, "Active Minutes"];
-                  return [value, name];
-                }}
+            <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+              <XAxis 
+                dataKey="date" 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{fill: '#94a3b8', fontSize: 12}}
               />
-              <Legend />
-              <ReferenceLine y={8000} stroke="#94a3b8" strokeDasharray="4 4" label="8k Steps Goal" />
-              <Line type="monotone" dataKey="steps" stroke="#4f46e5" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="calories" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} />
-              <Line type="monotone" dataKey="activeMinutes" stroke="#f59e0b" strokeWidth={2} dot={{ r: 3 }} />
+              <YAxis 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{fill: '#94a3b8', fontSize: 12}}
+              />
+              <Tooltip
+                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+              />
+              <Legend verticalAlign="top" align="right" height={36}/>
+              
+              {/* Only showing caloriesBurned as that's what is in your ActivityLog model */}
+              <Line 
+                name="Calories Burned" 
+                type="monotone" 
+                dataKey="caloriesBurned" 
+                stroke="#3b82f6" 
+                strokeWidth={3} 
+                dot={{ r: 4, fill: '#3b82f6' }} 
+                activeDot={{ r: 6 }} 
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -1,41 +1,144 @@
+// // import { Routes, Route, Navigate } from "react-router-dom";
+// // import Layout from "./pages/Layout";
+// // import Dashboard from "./pages/Dashboard";
+// // import FoodLog from "./pages/FoodLog";
+// // import ActivityLog from "./pages/ActivityLog";
+// // import Profile from "./pages/Profile";
+// // import Reports from "./pages/Reports"; // Added this import
+// // import Login from "./pages/Login";
+// // import Onboarding from "./pages/Onboarding";
+// // import Home from "./pages/Home";
+// // import Loading from "./components/Loading";
+// // import { useAppContext } from "./context/AppContext";
+// // import { Toaster } from "react-hot-toast";
+
+// // const App = () => {
+// //   const { user, isUserFetched, onboardingCompleted } = useAppContext();
+
+// //   if (!isUserFetched) return <Loading />;
+
+// //   return (
+// //     <>
+// //       <Toaster 
+// //         position="top-center"
+// //         reverseOrder={false}
+// //         gutter={8}
+// //         toastOptions={{
+// //           duration: 3000, 
+// //         }}
+// //       />
+// //       <Routes>
+// //         {/* 1. HOME PAGE */}
+// //         <Route path="/" element={<Home />} />
+
+// //         {/* 2. LOGIN / SIGNUP */}
+// //         <Route
+// //           path="/login"
+// //           element={
+// //             user 
+// //               ? (onboardingCompleted ? <Navigate to="/app" replace /> : <Navigate to="/onboarding" replace />) 
+// //               : <Login />
+// //           }
+// //         />
+
+// //         {/* 3. ONBOARDING */}
+// //         <Route
+// //           path="/onboarding"
+// //           element={
+// //             !user ? (
+// //               <Navigate to="/login" replace />
+// //             ) : onboardingCompleted ? (
+// //               <Navigate to="/app" replace />
+// //             ) : (
+// //               <Onboarding />
+// //             )
+// //           }
+// //         />
+
+// //         {/* 4. MAIN DASHBOARD (Protected) */}
+// //         <Route
+// //           path="/app"
+// //           element={
+// //             !user ? (
+// //               <Navigate to="/login" replace />
+// //             ) : !onboardingCompleted ? (
+// //               <Navigate to="/onboarding" replace />
+// //             ) : (
+// //               <Layout />
+// //             )
+// //           }
+// //         >
+// //           <Route index element={<Dashboard />} />
+// //           <Route path="food" element={<FoodLog />} />
+// //           <Route path="activity" element={<ActivityLog />} />
+// //           <Route path="profile" element={<Profile />} />
+// //           <Route path="reports" element={<Reports />} /> {/* Added this route */}
+          
+// //         </Route>
+
+// //         {/* FALLBACK */}
+// //         <Route path="*" element={<Navigate to="/" replace />} />
+// //       </Routes>
+// //     </>
+// //   );
+// // };
+
+// // export default App;
 // import { Routes, Route, Navigate } from "react-router-dom";
 // import Layout from "./pages/Layout";
 // import Dashboard from "./pages/Dashboard";
 // import FoodLog from "./pages/FoodLog";
 // import ActivityLog from "./pages/ActivityLog";
 // import Profile from "./pages/Profile";
-// import Login from "./pages/Login";
-// import Loading from "./components/Loading";
-// import Onboarding from "./pages/Onboarding";
-// import Reports from "./pages/Reports";
+// import Reports from "./pages/Reports"; 
+
+// // IMPORT YOUR CHART COMPONENTS HERE
 // import ActivityChart from "./pages/ActivityChart";
 // import BodyChart from "./pages/BodyChart";
 // import GoalChart from "./pages/GoalChart";
 // import ConsistencyChart from "./pages/ConsistencyChart";
+
+// import Login from "./pages/Login";
+// import Onboarding from "./pages/Onboarding";
+// import Home from "./pages/Home";
+// import Loading from "./components/Loading";
 // import { useAppContext } from "./context/AppContext";
 // import { Toaster } from "react-hot-toast";
+// import AdminLayout from "./admin/AdminLayout";
+// import AdminDashboard from "./admin/AdminDashboard";
+// import UserManagement from "./admin/UserManagement";
+// import GlobalFoodLogs from "./admin/GlobalFoodLogs";
 
 // const App = () => {
 //   const { user, isUserFetched, onboardingCompleted } = useAppContext();
 
-//   // 🔴 Wait until user is fully loaded
 //   if (!isUserFetched) return <Loading />;
-
-//   // 🔴 Prevent redirect glitch (VERY IMPORTANT)
-//   if (user && onboardingCompleted === null) return <Loading />;
 
 //   return (
 //     <>
-//       <Toaster />
-
+//       <Toaster 
+//         position="top-center"
+//         reverseOrder={false}
+//         gutter={8}
+//         toastOptions={{
+//           duration: 3000,
+//         }}
+//       />
 //       <Routes>
-//         {/* LOGIN */}
+//         {/* 1. HOME PAGE */}
+//         <Route path="/" element={<Home />} />
+
+//         {/* 2. LOGIN / SIGNUP */}
 //         <Route
 //           path="/login"
-//           element={user ? <Navigate to="/app" replace /> : <Login />}
+//           element={
+//             user 
+//               ? (onboardingCompleted ? <Navigate to="/app" replace /> : <Navigate to="/onboarding" replace />) 
+//               : <Login />
+//           }
 //         />
 
-//         {/* ONBOARDING */}
+//         {/* 3. ONBOARDING */}
 //         <Route
 //           path="/onboarding"
 //           element={
@@ -49,7 +152,7 @@
 //           }
 //         />
 
-//         {/* MAIN APP */}
+//         {/* 4. MAIN DASHBOARD (Protected) */}
 //         <Route
 //           path="/app"
 //           element={
@@ -66,18 +169,27 @@
 //           <Route path="food" element={<FoodLog />} />
 //           <Route path="activity" element={<ActivityLog />} />
 //           <Route path="profile" element={<Profile />} />
-//           <Route path="reports" element={<Reports />} />
+          
+//           {/* REPORTS SECTION */}
+//           <Route path="reports" element={<Reports />} /> 
+          
+//           {/* CHART SUB-ROUTES: These must be defined so the links work */}
 //           <Route path="reports/activity-chart" element={<ActivityChart />} />
 //           <Route path="reports/body-chart" element={<BodyChart />} />
 //           <Route path="reports/goal-chart" element={<GoalChart />} />
-//           <Route
-//             path="reports/consistency-chart"
-//             element={<ConsistencyChart />}
-//           />
+//           <Route path="reports/consistency-chart" element={<ConsistencyChart />} />
+
+//           {/* New Admin Routes */}
+//   <Route path="/admin" element={<AdminLayout />}>
+//     <Route index element={<AdminDashboard />} />
+//     <Route path="users" element={<UserManagement />} />
+//     <Route path="logs" element={<GlobalFoodLogs />} />
+//   </Route>
+          
 //         </Route>
 
-//         {/* DEFAULT */}
-//         <Route path="*" element={<Navigate to="/app" replace />} />
+//         {/* FALLBACK */}
+//         <Route path="*" element={<Navigate to="/" replace />} />
 //       </Routes>
 //     </>
 //   );
@@ -85,87 +197,98 @@
 
 // export default App;
 
-
 import { Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+
+// USER PAGES
 import Layout from "./pages/Layout";
 import Dashboard from "./pages/Dashboard";
 import FoodLog from "./pages/FoodLog";
 import ActivityLog from "./pages/ActivityLog";
 import Profile from "./pages/Profile";
+import Reports from "./pages/Reports"; 
+
+// CHART COMPONENTS
+import ActivityChart from "./pages/ActivityChart";
+import BodyChart from "./pages/BodyChart";
+import GoalChart from "./pages/GoalChart";
+import ConsistencyChart from "./pages/ConsistencyChart";
+
+// ADMIN COMPONENTS
+import AdminLayout from "./admin/AdminLayout";
+import AdminDashboard from "./admin/AdminDashboard";
+import UserManagement from "./admin/UserManagement";
+import GlobalFoodLogs from "./admin/GlobalFoodLogs";
+import GlobalActivityLogs from "./admin/GlobalActivityLogs";
+import UserStatusTable from "./admin/UserStatusTable";
+
+// AUTH & UI
 import Login from "./pages/Login";
 import Onboarding from "./pages/Onboarding";
-// import Reports from "./pages/Reports";
-// import ActivityChart from "./pages/ActivityChart";
-// import BodyChart from "./pages/BodyChart";
-// import GoalChart from "./pages/GoalChart";
-// import ConsistencyChart from "./pages/ConsistencyChart";
 import Home from "./pages/Home";
 import Loading from "./components/Loading";
 import { useAppContext } from "./context/AppContext";
-import { Toaster } from "react-hot-toast";
 
 const App = () => {
   const { user, isUserFetched, onboardingCompleted } = useAppContext();
 
-  // ⏳ Wait until user is loaded
   if (!isUserFetched) return <Loading />;
 
   return (
     <>
-      <Toaster />
-
+      <Toaster position="top-center" />
       <Routes>
-
-        {/* 🏠 HOME PAGE */}
+        {/* SECTION 1: PUBLIC */}
         <Route path="/" element={<Home />} />
-
-        {/* 🔐 LOGIN + SIGNUP (same page) */}
         <Route
           path="/login"
-          element={user ? <Navigate to="/app" replace /> : <Login />}
-        />
-
-        {/* 🧠 ONBOARDING */}
-        <Route
-          path="/onboarding"
           element={
-            !user ? (
-              <Navigate to="/login" replace />
-            ) : !onboardingCompleted ? (
-              <Onboarding />
-            ) : (
-              <Navigate to="/app" replace />
-            )
+            user 
+              ? (onboardingCompleted ? <Navigate to="/app" replace /> : <Navigate to="/onboarding" replace />) 
+              : <Login />
           }
         />
 
-        {/* 📊 MAIN APP */}
+        {/* SECTION 2: ONBOARDING */}
+        <Route
+          path="/onboarding"
+          element={
+            !user ? <Navigate to="/login" replace /> : 
+            onboardingCompleted ? <Navigate to="/app" replace /> : <Onboarding />
+          }
+        />
+
+        {/* SECTION 3: USER APP (All paths here start with /app) */}
         <Route
           path="/app"
           element={
-            !user ? (
-              <Navigate to="/login" replace />
-            ) : !onboardingCompleted ? (
-              <Navigate to="/onboarding" replace />
-            ) : (
-              <Layout />
-            )
+            !user ? <Navigate to="/login" replace /> : 
+            !onboardingCompleted ? <Navigate to="/onboarding" replace /> : <Layout />
           }
         >
           <Route index element={<Dashboard />} />
           <Route path="food" element={<FoodLog />} />
           <Route path="activity" element={<ActivityLog />} />
           <Route path="profile" element={<Profile />} />
-          {/* <Route path="reports" element={<Reports />} />
+          <Route path="reports" element={<Reports />} /> 
           <Route path="reports/activity-chart" element={<ActivityChart />} />
           <Route path="reports/body-chart" element={<BodyChart />} />
           <Route path="reports/goal-chart" element={<GoalChart />} />
-          <Route path="reports/consistency-chart" element={<ConsistencyChart />} /> */}
+          <Route path="reports/consistency-chart" element={<ConsistencyChart />} />
         </Route>
 
-        {/* 🔄 FALLBACK */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* SECTION 4: ADMIN PANEL (Path starts with /admin) */}
+        {/* Notice this is NOT inside the /app block anymore */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="logs" element={<GlobalFoodLogs />} />
+          <Route path="activity-logs" element={<GlobalActivityLogs />} />
+          <Route path="users-status" element={<UserStatusTable />} />
+        </Route>
 
+        {/* SECTION 5: CATCH-ALL */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );

@@ -1,357 +1,81 @@
-import { useEffect, useState } from "react"
-import { getMotivationalMessage } from "../assets/assets"
-import { useAppContext } from "../context/AppContext"
-import type { ActivityEntry, FoodEntry } from "../types"
-import Card from "../components/ui/Card"
-import ProgressBar from "../components/ui/ProgressBar"
-import { Activity, FlameIcon, HamburgerIcon, Ruler, ScaleIcon, TrendingUpIcon, ZapIcon } from "lucide-react"
-import CaloriesChart from "../components/CaloriesChart"
-
-
-const Dashboard = () => {
-
-  const {user, allActivityLogs, allFoodLogs} = useAppContext()
-  const [todayFood, setTodayFood] = useState<FoodEntry[]>([])
-  const [todayActivities, setTodayActivities] = useState<ActivityEntry[]>([])
-
-  const DAILY_CALORIE_LIMIT: number = user?.dailyCalorieIntake || 2000;
-
-  // Load user data
-  const loadUserData = () => {
-    const today = new Date().toISOString().split('T')[0];
-
-    const foodData = allFoodLogs.filter((f: FoodEntry)=> f.createdAt?.split('T')[0] === today)
-    setTodayFood(foodData)
-
-    const activityData = allActivityLogs.filter((a: ActivityEntry)=> a.createdAt?.split('T')[0] === today)
-    setTodayActivities(activityData)
-
-  }
-
-  useEffect(()=>{
-    (()=>{loadUserData()})();
-  },[allActivityLogs, allFoodLogs])
-
-  const totalCalories: number = todayFood.reduce((sum, item)=> sum + item.calories, 0)
-
-  const remainingCalories: number = DAILY_CALORIE_LIMIT - totalCalories;
-
-  const totalActiveMinutes: number = todayActivities.reduce((sum, item)=> sum + item.duration, 0)
-
-  const totalBurned: number = todayActivities.reduce((sum, item)=> sum + (item.calories || 0), 0)
-
-  const motivation = getMotivationalMessage(totalCalories, totalActiveMinutes, DAILY_CALORIE_LIMIT)
-
-  return (
-    <div className="page-container">
-      {/* Header */}
-      <div className="dashboard-header">
-        <p className='text-emerald-100 text-sm font-medium'>Welcome back</p>
-        <h1 className="text-2xl font-bold mt-1">{`Hi there! 👋 ${user?.username}`}</h1>
-
-        {/* Motivation Card */}
-        <div className="mt-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">{motivation.emoji}</span>
-            <p className="text-white font-medium">{motivation.text}</p>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Main Content */}
-      <div className="dashboard-grid">
-        {/* Calories Card */}
-        <Card className="shadow-lg col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                <HamburgerIcon className='w-6 h-6 text-orange-500'/>
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Calories Consumed</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white">{totalCalories}</p>
-              </div>
-
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Limit</p>
-              <p className="text-2xl font-bold text-slate-800 dark:text-white">{DAILY_CALORIE_LIMIT}</p>
-            </div>
-          </div>
-          <ProgressBar value={totalCalories} max={DAILY_CALORIE_LIMIT}/>
-
-          <div className="mt-4 flex justify-between items-center">
-            <div className={`px-3 py-1.5 rounded-lg ${remainingCalories >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400' : 'bg-red-50 dark:bg-red-900/10 text-red-700 dark:text-red-400'}`}>
-              <span className="text-sm font-medium">
-                {remainingCalories >= 0 ? `${remainingCalories} kcal remaining` : `${Math.abs(remainingCalories)} kcal over`}
-              </span>
-            </div>
-
-            <span className="text-sm text-slate-400">{Math.round((totalCalories / DAILY_CALORIE_LIMIT) * 100)}%</span>
-          </div>
-
-          <div className="border-t border-slate-100 dark:border-slate-800 my-4"></div>
-
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
-                <FlameIcon className='w-6 h-6 text-orange-500'/>
-              </div>
-              <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">Calories Burned</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white">{totalBurned}</p>
-              </div>
-
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Goal</p>
-              <p className="text-2xl font-bold text-slate-800 dark:text-white">{user?.dailyCalorieBurn || 400}</p>
-            </div>
-          </div>
-          <ProgressBar value={totalBurned} max={user?.dailyCalorieBurn || 400}/>
-        </Card>
-
-        {/* Stats Row */}
-        <div className="dashboard-card-grid">
-          {/* Active Minutes */}
-          <Card>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                <Activity className='w-5 h-5 text-blue-500'/>
-              </div>
-              <p className="text-sm text-slate-500">Active</p>
-            </div>
-            <p className="text-2xl font-bold text-slate-800 dark:text-white">{totalActiveMinutes}</p>
-            <p className="text-sm text-slate-400">minutes today</p>
-          </Card>
-
-          {/* Activities Count */}
-          <Card>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                <ZapIcon className='w-5 h-5 text-purple-500'/>
-              </div>
-              <p className="text-sm text-slate-500">Workouts</p>
-            </div>
-            <p className="text-2xl font-bold text-slate-800 dark:text-white">{todayActivities.length}</p>
-            <p className="text-sm text-slate-400">activities logged</p>
-          </Card>
-        </div>
-
-         {/* Goal Card */}
-         {user && ( // This card will span both columns on large screens
-          <Card className="bg-linear-to-r from-slate-800 to-slate-700">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
-                <TrendingUpIcon className='w-6 h-6 text-emerald-400'/>
-              </div>
-              <div>
-                <p className="text-slate-400 text-sm">Your Goal</p>
-                <p className="text-white font-semibold capitalize">
-                  {user.goal === 'lose' && '🔥 Lose Weight'}
-                  {user.goal === 'maintain' && '⚖️ Maintain Weight'}
-                  {user.goal === 'gain' && '💪 Gain Muscle'}
-                </p>
-              </div>
-            </div>
-          </Card>
-         )}
-
-          {/* Body Metrics Card */}
-          {user && user.weight && (
-            <Card>
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center">
-                  <ScaleIcon className='w-6 h-6 text-indigo-500'/>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-slate-800 dark:text-white">Body Metrics</h3>
-                  <p className="text-slate-500 text-sm">Your stats</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
-                      <ScaleIcon className='w-4 h-4 text-slate-500' />
-                    </div>
-                    <span className="text-sm text-slate-500 dark:text-slate-400">Weight</span>
-                  </div>
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">{user.weight} kg</span>
-                </div>
-
-                {user.height && (
-                  <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800">
-                      <Ruler className='w-4 h-4 text-slate-500' />
-                    </div>
-                    <span className="text-sm text-slate-500 dark:text-slate-400">Height</span>
-                  </div>
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">{user.height} cm</span>
-                </div>
-                )}
-
-                {user.height && (
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">BMI</span>
-                      {(()=>{
-                        const bmi = (user.weight / Math.pow(user.height / 100, 2)).toFixed(1);
-                        const getStatus = (b: number)=>{
-                          if(b < 18.5) return {
-                            color: 'text-blue-500',
-                            bg: 'bg-blue-500' };
-                          if(b < 25) return {
-                            color: 'text-emerald-500', 
-                            bg: 'bg-emerald-500'
-                          };
-                          if(b < 30) return {
-                            color: 'text-orange-500', 
-                            bg: 'bg-orange-500'
-                          };
-
-                          return {
-                            color: 'text-red-500', 
-                            bg: 'bg-red-500'
-                          };
-                        }
-                        const status = getStatus(Number(bmi));
-                        return <span className={`text-lg font-bold ${status.color}`}>{bmi}</span>
-                      })()}
-                    </div>
-
-                     {/* BMI Scale Visual */}
-                     <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                      <div className="flex-1 bg-blue-400 opacity-30"></div>
-                      <div className="flex-1 bg-emerald-400 opacity-30"></div>
-                      <div className="flex-1 bg-orange-400 opacity-30"></div>
-                      <div className="flex-1 bg-red-400 opacity-30"></div>
-                     </div>
-                     <div className="flex justify-between mt-1 text-[10px] text-slate-400">
-                      <span>18.5</span>
-                      <span>25</span>
-                      <span>30</span>
-                     </div>
-                  </div>
-                )}
-              </div>
-            </Card>
-          )}
-
-           {/* Quick Summary */}
-           <Card>
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Today's Summary</h3>
-
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400">Meals logged</span>
-                <span className="font-medium text-slate-700 dark:text-slate-200">{todayFood.length}</span>
-              </div>
-              <div className="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800">
-                <span className="text-slate-500 dark:text-slate-400">Total calories</span>
-                <span className="font-medium text-slate-700 dark:text-slate-200">{totalCalories} kcal</span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-slate-500 dark:text-slate-400">Active time</span>
-                <span className="font-medium text-slate-700 dark:text-slate-200">{totalActiveMinutes} min</span>
-              </div>
-
-            </div>
-           </Card>
-
-           {/* Activity & Intake Graph */}
-           <Card className="col-span-2">
-            <h3 className="font-semibold text-slate-800 dark:text-white mb-2">This Week's Progress</h3>
-            <CaloriesChart />
-           </Card>
-      </div>
-    </div>
-  )
-}
-
-export default Dashboard
-
-// import { useEffect, useState } from "react"
-// import { getMotivationalMessage } from "../assets/assets"
-// import { useAppContext } from "../context/AppContext"
-// import type { ActivityEntry, FoodEntry } from "../types"
-// import Card from "../components/ui/Card"
-// import ProgressBar from "../components/ui/ProgressBar"
-// import { Activity, FlameIcon, HamburgerIcon, Ruler, ScaleIcon, TrendingUpIcon, ZapIcon } from "lucide-react"
-// import CaloriesChart from "../components/CaloriesChart"
+// import { useEffect, useState } from "react";
+// import { getMotivationalMessage } from "../assets/assets";
+// import { useAppContext } from "../context/AppContext";
+// import type { ActivityEntry, FoodEntry } from "../types";
+// import Card from "../components/ui/Card";
+// import ProgressBar from "../components/ui/ProgressBar";
+// import { Activity, FlameIcon, HamburgerIcon, TrendingUpIcon, ZapIcon, ScaleIcon } from "lucide-react";
+// import CaloriesChart from "../components/CaloriesChart";
+// import api from "../configs/api";
 
 // const Dashboard = () => {
+//   const { user, allActivityLogs, allFoodLogs } = useAppContext();
+//   const [todayFood, setTodayFood] = useState<FoodEntry[]>([]);
+//   const [todayActivities, setTodayActivities] = useState<ActivityEntry[]>([]);
+//   const [profile, setProfile] = useState<any>(null);
 
-//   const { user, allActivityLogs, allFoodLogs } = useAppContext()
-
-//   const [todayFood, setTodayFood] = useState<FoodEntry[]>([])
-//   const [todayActivities, setTodayActivities] = useState<ActivityEntry[]>([])
-
-//   // ✅ NEW: profile from backend
-//   const [profile, setProfile] = useState<any>(null)
-
-//   // ✅ FETCH PROFILE FROM STRAPI
+//   // 1. Fetch Profile for Goals
 //   useEffect(() => {
 //     const fetchProfile = async () => {
 //       try {
-//         const token = localStorage.getItem("token")
-
-//         const res = await fetch("http://localhost:1337/api/user-profiles?populate=*", {
-//           headers: {
-//             Authorization: `Bearer ${token}`
-//           }
-//         })
-
-//         const data = await res.json()
-
-//         // 👉 take first profile (temporary)
-//         setProfile(data.data[0]?.attributes || null)
-
-//         console.log("PROFILE:", data)
-//       } catch (err) {
-//         console.error("Error fetching profile:", err)
+//         const res = await api.get("/user/profile");
+//         setProfile(res.data);
+//       } catch (err: any) {
+//         console.log("Profile check completed.");
 //       }
-//     }
+//     };
+//     fetchProfile();
+//   }, []);
 
-//     fetchProfile()
-//   }, [])
-
-//   // ✅ USE PROFILE DATA
-//   const DAILY_CALORIE_LIMIT: number = profile?.dailyCalorieIntake || 2000
-
-//   const loadUserData = () => {
-//     const today = new Date().toISOString().split('T')[0]
-
-//     const foodData = allFoodLogs.filter((f: FoodEntry) => f.createdAt?.split('T')[0] === today)
-//     setTodayFood(foodData)
-
-//     const activityData = allActivityLogs.filter((a: ActivityEntry) => a.createdAt?.split('T')[0] === today)
-//     setTodayActivities(activityData)
-//   }
-
+//   // 2. Logic to filter logs for TODAY
 //   useEffect(() => {
-//     loadUserData()
-//   }, [allActivityLogs, allFoodLogs])
+//     const loadUserData = () => {
+//       const today = new Date().toISOString().split('T')[0];
 
-//   const totalCalories: number = todayFood.reduce((sum, item) => sum + item.calories, 0)
-//   const remainingCalories: number = DAILY_CALORIE_LIMIT - totalCalories
-//   const totalActiveMinutes: number = todayActivities.reduce((sum, item) => sum + item.duration, 0)
-//   const totalBurned: number = todayActivities.reduce((sum, item) => sum + (item.calories || 0), 0)
+//       // Filter food logs for today
+//       const foodData = (allFoodLogs || []).filter(
+//         (f: any) => (f.date === today || f.createdAt?.split('T')[0] === today)
+//       );
+//       setTodayFood(foodData);
 
-//   const motivation = getMotivationalMessage(totalCalories, totalActiveMinutes, DAILY_CALORIE_LIMIT)
+//       // Filter activity logs for today
+//       const activityData = (allActivityLogs || []).filter(
+//         (a: any) => (a.date === today || a.createdAt?.split('T')[0] === today)
+//       );
+//       setTodayActivities(activityData);
+//     };
+
+//     loadUserData();
+//   }, [allActivityLogs, allFoodLogs]);
+
+//   // 3. Dynamic Variables & Goals
+//   const DAILY_CALORIE_LIMIT: number = profile?.dailyCalorieIntake || user?.dailyCalorieIntake || 2000;
+//   const CALORIE_BURN_GOAL: number = profile?.dailyCalorieBurn || user?.dailyCalorieBurn || 400;
+  
+//   const currentWeight = profile?.weight || user?.weight;
+//   const currentHeight = profile?.height || user?.height;
+//   const currentGoal = profile?.goal || user?.goal;
+
+//   // 4. Calculations
+//   const totalCalories: number = todayFood.reduce((sum, item) => sum + (item.calories || 0), 0);
+//   const remainingCalories: number = DAILY_CALORIE_LIMIT - totalCalories;
+//   const totalActiveMinutes: number = todayActivities.reduce((sum, item) => sum + (item.duration || 0), 0);
+  
+//   // ✅ FIX: Ensure this matches your backend key 'caloriesBurned'
+//   const totalBurned: number = todayActivities.reduce((sum, item: any) => {
+//     return sum + (item.caloriesBurned || item.calories || 0);
+//   }, 0);
+
+//   const motivation = getMotivationalMessage(totalCalories, totalActiveMinutes, DAILY_CALORIE_LIMIT);
 
 //   return (
 //     <div className="page-container">
-
 //       {/* Header */}
-//       <div className="dashboard-header">
-//         <p className='text-emerald-100 text-sm font-medium'>Welcome back</p>
-//         <h1 className="text-2xl font-bold mt-1">{`Hi there! 👋 ${user?.username}`}</h1>
+//       <div className="dashboard-header bg-emerald-600 p-8 rounded-b-3xl text-white mb-8">
+//         <p className='text-emerald-100 text-sm font-medium uppercase tracking-wider'>Welcome back</p>
+//         <h1 className="text-3xl font-bold mt-1">{`Hi there! 👋 ${user?.username || 'User'}`}</h1>
 
-//         <div className="mt-6 bg-white/20 backdrop-blur-sm rounded-2xl p-4">
+//         <div className="mt-6 bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/20">
 //           <div className="flex items-center gap-3">
 //             <span className="text-3xl">{motivation.emoji}</span>
 //             <p className="text-white font-medium">{motivation.text}</p>
@@ -359,89 +83,349 @@ export default Dashboard
 //         </div>
 //       </div>
 
-//       {/* Main Content */}
-//       <div className="dashboard-grid">
-
+//       <div className="dashboard-grid grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
 //         {/* Calories Card */}
-//         <Card className="shadow-lg col-span-2">
-//           <div className="flex justify-between mb-4">
-//             <div>
-//               <p>Calories Consumed</p>
-//               <h2>{totalCalories}</h2>
-//             </div>
-//             <div>
-//               <p>Limit</p>
-//               <h2>{DAILY_CALORIE_LIMIT}</h2>
-//             </div>
-//           </div>
-
-//           <ProgressBar value={totalCalories} max={DAILY_CALORIE_LIMIT} />
-
-//           <p>
-//             {remainingCalories >= 0
-//               ? `${remainingCalories} kcal remaining`
-//               : `${Math.abs(remainingCalories)} kcal over`}
-//           </p>
-
-//           <hr />
-
-//           <div className="flex justify-between mt-4">
-//             <div>
-//               <p>Calories Burned</p>
-//               <h2>{totalBurned}</h2>
-//             </div>
-//             <div>
-//               <p>Goal</p>
-//               <h2>{profile?.dailyCalorieBurn || 400}</h2>
-//             </div>
-//           </div>
-
-//           <ProgressBar value={totalBurned} max={profile?.dailyCalorieBurn || 400} />
-//         </Card>
-
-//         {/* Goal Card */}
-//         {profile && (
-//           <Card>
+//         <Card className="shadow-lg md:col-span-2 border-none bg-white dark:bg-slate-900">
+//           <div className="flex items-center justify-between mb-4">
 //             <div className="flex items-center gap-3">
-//               <TrendingUpIcon />
+//               <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+//                 <HamburgerIcon className='w-6 h-6 text-orange-500'/>
+//               </div>
 //               <div>
-//                 <p>Your Goal</p>
-//                 <h3>{profile.goal}</h3>
+//                 <p className="text-sm text-slate-500">Consumed</p>
+//                 <p className="text-2xl font-bold">{totalCalories} kcal</p>
 //               </div>
 //             </div>
-//           </Card>
-//         )}
+//             <div className="text-right">
+//               <p className="text-sm text-slate-500">Daily Limit</p>
+//               <p className="text-2xl font-bold">{DAILY_CALORIE_LIMIT}</p>
+//             </div>
+//           </div>
+//           <ProgressBar value={totalCalories} max={DAILY_CALORIE_LIMIT}/>
 
-//         {/* Body Metrics */}
-//         {profile && (
-//           <Card>
-//             <h3>Body Metrics</h3>
+//           <div className="mt-4 flex justify-between items-center">
+//             <div className={`px-3 py-1 rounded-full text-xs font-bold ${remainingCalories >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+//                 {remainingCalories >= 0 ? `${remainingCalories} kcal left` : `${Math.abs(remainingCalories)} kcal over`}
+//             </div>
+//             <span className="text-sm text-slate-400">{Math.round((totalCalories / DAILY_CALORIE_LIMIT) * 100) || 0}%</span>
+//           </div>
 
-//             <p>Weight: {profile.weight} kg</p>
-//             <p>Height: {profile.height} cm</p>
+//           <div className="border-t border-slate-100 dark:border-slate-800 my-6"></div>
 
-//             <p>BMI: {profile.bmi}</p>
-//             <p>Category: {profile.bmiCategory}</p>
-//           </Card>
-//         )}
-
-//         {/* Summary */}
-//         <Card>
-//           <h3>Today's Summary</h3>
-
-//           <p>Meals: {todayFood.length}</p>
-//           <p>Calories: {totalCalories}</p>
-//           <p>Active: {totalActiveMinutes} min</p>
+//           <div className="flex items-center justify-between mb-4">
+//             <div className="flex items-center gap-3">
+//               <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+//                 <FlameIcon className='w-6 h-6 text-red-500'/>
+//               </div>
+//               <div>
+//                 <p className="text-sm text-slate-500">Burned</p>
+//                 <p className="text-2xl font-bold">{totalBurned} kcal</p>
+//               </div>
+//             </div>
+//             <div className="text-right">
+//               <p className="text-sm text-slate-500">Burn Goal</p>
+//               <p className="text-2xl font-bold">{CALORIE_BURN_GOAL}</p>
+//             </div>
+//           </div>
+//           <ProgressBar value={totalBurned} max={CALORIE_BURN_GOAL}/>
 //         </Card>
 
-//         {/* Chart */}
-//         <Card className="col-span-2">
+//         {/* Stats Row */}
+//         <div className="grid grid-cols-2 gap-4">
+//           <Card>
+//             <Activity className='w-5 h-5 text-blue-500 mb-2'/>
+//             <p className="text-2xl font-bold">{totalActiveMinutes}</p>
+//             <p className="text-xs text-slate-500">Active Mins</p>
+//           </Card>
+//           <Card>
+//             <ZapIcon className='w-5 h-5 text-purple-500 mb-2'/>
+//             <p className="text-2xl font-bold">{todayActivities.length}</p>
+//             <p className="text-xs text-slate-500">Workouts</p>
+//           </Card>
+//         </div>
+
+//         {/* Goal Card */}
+//         <Card className="bg-slate-800 text-white flex items-center gap-4">
+//             <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+//               <TrendingUpIcon className='text-emerald-400'/>
+//             </div>
+//             <div>
+//               <p className="text-slate-400 text-xs">Current Goal</p>
+//               <p className="font-bold capitalize">{currentGoal || 'Set your goal'}</p>
+//             </div>
+//         </Card>
+
+//         {/* Body Metrics Card */}
+//         <Card className="md:col-span-1">
+//           <div className="flex items-center gap-3 mb-4">
+//             <ScaleIcon className="text-indigo-500 w-5 h-5"/>
+//             <h3 className="font-bold">Body Metrics</h3>
+//           </div>
+//           <div className="space-y-3">
+//             <div className="flex justify-between text-sm">
+//               <span className="text-slate-500">Weight</span>
+//               <span className="font-bold">{currentWeight || '--'} kg</span>
+//             </div>
+//             <div className="flex justify-between text-sm">
+//               <span className="text-slate-500">Height</span>
+//               <span className="font-bold">{currentHeight || '--'} cm</span>
+//             </div>
+//             {currentWeight && currentHeight && (
+//               <div className="pt-2 border-t">
+//                  <div className="flex justify-between items-center">
+//                     <span className="text-sm font-medium">BMI</span>
+//                     <span className="text-lg font-black text-emerald-500">
+//                         {(currentWeight / Math.pow(currentHeight / 100, 2)).toFixed(1)}
+//                     </span>
+//                  </div>
+//               </div>
+//             )}
+//           </div>
+//         </Card>
+
+//         {/* Activity & Intake Graph */}
+//         <Card className="md:col-span-2">
+//           <h3 className="font-bold mb-4">Weekly Progress</h3>
 //           <CaloriesChart />
 //         </Card>
-
 //       </div>
 //     </div>
-//   )
-// }
+//   );
+// };
 
-// export default Dashboard
+// export default Dashboard;
+import { useEffect, useState, useMemo } from "react";
+import { getMotivationalMessage } from "../assets/assets";
+import { useAppContext } from "../context/AppContext";
+import type { ActivityEntry, FoodEntry } from "../types";
+import Card from "../components/ui/Card";
+import ProgressBar from "../components/ui/ProgressBar";
+import { Activity, FlameIcon, HamburgerIcon, TrendingUpIcon, ZapIcon, ScaleIcon } from "lucide-react";
+import CaloriesChart from "../components/CaloriesChart";
+
+const Dashboard = () => {
+  // ✅ Pulling everything from Context - no local fetch needed
+  const { user, profile, allActivityLogs, allFoodLogs, refreshAppData } = useAppContext();
+  
+  
+  const [todayFood, setTodayFood] = useState<FoodEntry[]>([]);
+  const [todayActivities, setTodayActivities] = useState<ActivityEntry[]>([]);
+
+  // 1. Initial Refresh on mount to ensure fresh data
+  useEffect(() => {
+    refreshAppData();
+  }, [refreshAppData]);
+
+  // 2. Logic to filter logs for TODAY whenever logs change
+
+useEffect(() => {
+  const loadUserData = () => {
+    // Standardize 'today' to your local browser date string
+    const date = new Date();
+    const offset = date.getTimezoneOffset();
+    const today = new Date(date.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
+
+    // Filter Food Logs
+    const foodData = (allFoodLogs || []).filter((f: any) => {
+      const entryDate = f.date || f.createdAt?.split('T')[0];
+      return entryDate === today;
+    });
+    setTodayFood(foodData);
+
+    // Filter Activity Logs (Ensuring both sync together)
+    const activityData = (allActivityLogs || []).filter((a: any) => {
+      const entryDate = a.date || a.createdAt?.split('T')[0];
+      return entryDate === today;
+    });
+    setTodayActivities(activityData);
+  };
+
+  loadUserData();
+}, [allFoodLogs, allActivityLogs]);
+
+
+//   useEffect(() => {
+//   const loadUserData = () => {
+//     const date = new Date();
+//     const offset = date.getTimezoneOffset();
+//     const today = new Date(date.getTime() - (offset * 60 * 1000)).toISOString().split('T')[0];
+
+//     // Filter Food
+//     const foodData = (allFoodLogs || []).filter((f: any) => {
+//       const entryDate = f.date || f.createdAt?.split('T')[0];
+//       return entryDate === today;
+//     });
+//     setTodayFood(foodData);
+
+//     // ✅ FIX: Added the missing activity filtering logic
+//     const activityData = (allActivityLogs || []).filter((a: any) => {
+//       const entryDate = a.date || a.createdAt?.split('T')[0];
+//       return entryDate === today;
+//     });
+//     setTodayActivities(activityData);
+//   };
+
+//   loadUserData();
+// }, [allFoodLogs, allActivityLogs]); // ✅ Added allActivityLogs here
+
+
+  // 3. Dynamic Variables & Goals (Prioritizing Profile over User object)
+  const DAILY_CALORIE_LIMIT: number = profile?.dailyCalorieIntake || 2000;
+  const CALORIE_BURN_GOAL: number = profile?.dailyCalorieBurn || 400;
+  
+  const currentWeight = profile?.weight;
+  const currentHeight = profile?.height;
+  const currentGoal = profile?.goal;
+
+  // 4. Calculations
+  const totalCalories: number = todayFood.reduce((sum, item) => sum + (item.calories || 0), 0);
+  const remainingCalories: number = DAILY_CALORIE_LIMIT - totalCalories;
+  const totalActiveMinutes: number = todayActivities.reduce((sum, item) => sum + (item.duration || 0), 0);
+  
+  const totalBurned: number = todayActivities.reduce((sum, item: any) => {
+    return sum + (item.caloriesBurned || item.calories || 0);
+  }, 0);
+
+  // Memoize motivation to prevent flickering on re-renders
+  const motivation = useMemo(() => 
+    getMotivationalMessage(totalCalories, totalActiveMinutes, DAILY_CALORIE_LIMIT),
+    [totalCalories, totalActiveMinutes, DAILY_CALORIE_LIMIT]
+  );
+
+  return (
+    <div className="page-container">
+      {/* Header */}
+      <div className="dashboard-header bg-emerald-600 p-8 rounded-b-3xl text-white mb-8 shadow-md">
+        <p className='text-emerald-100 text-sm font-medium uppercase tracking-wider'>Welcome back</p>
+        <h1 className="text-3xl font-bold mt-1">{`Hi there! 👋 ${user?.username || 'User'}`}</h1>
+
+        <div className="mt-6 bg-white/20 backdrop-blur-md rounded-2xl p-4 border border-white/30">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl" role="img" aria-label="motivation-emoji">{motivation.emoji}</span>
+            <p className="text-white font-medium">{motivation.text}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="dashboard-grid grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
+        {/* Calories Card */}
+        <Card className="shadow-lg md:col-span-2 border-none bg-white dark:bg-slate-900">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center">
+                <HamburgerIcon className='w-6 h-6 text-orange-500'/>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">Consumed Today</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-white">{totalCalories} kcal</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-slate-500">Target</p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-white">{DAILY_CALORIE_LIMIT}</p>
+            </div>
+          </div>
+          <ProgressBar value={totalCalories} max={DAILY_CALORIE_LIMIT} color="bg-orange-500"/>
+
+          <div className="mt-4 flex justify-between items-center">
+            <div className={`px-3 py-1 rounded-full text-xs font-bold ${remainingCalories >= 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                {remainingCalories >= 0 ? `${remainingCalories} kcal left` : `${Math.abs(remainingCalories)} kcal over`}
+            </div>
+            <span className="text-sm text-slate-400 font-medium">
+                {Math.round((totalCalories / DAILY_CALORIE_LIMIT) * 100) || 0}%
+            </span>
+          </div>
+
+          <div className="border-t border-slate-100 dark:border-slate-800 my-6"></div>
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+                <FlameIcon className='w-6 h-6 text-red-500'/>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">Activity Burn</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-white">{totalBurned} kcal</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-slate-500">Burn Goal</p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-white">{CALORIE_BURN_GOAL}</p>
+            </div>
+          </div>
+          <ProgressBar value={totalBurned} max={CALORIE_BURN_GOAL} color="bg-red-500"/>
+        </Card>
+
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="hover:shadow-md transition-shadow">
+            <Activity className='w-5 h-5 text-blue-500 mb-2'/>
+            <p className="text-2xl font-bold text-slate-800 dark:text-white">{totalActiveMinutes}</p>
+            <p className="text-xs text-slate-500 font-semibold uppercase tracking-tight">Active Mins</p>
+          </Card>
+          <Card className="hover:shadow-md transition-shadow">
+            <ZapIcon className='w-5 h-5 text-purple-500 mb-2'/>
+            <p className="text-2xl font-bold text-slate-800 dark:text-white">{todayActivities.length}</p>
+            <p className="text-xs text-slate-500 font-semibold uppercase tracking-tight">Workouts</p>
+          </Card>
+        </div>
+
+        {/* Goal Card */}
+        <Card className="bg-slate-800 dark:bg-slate-950 text-white flex items-center gap-4 hover:brightness-110 transition-all">
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+              <TrendingUpIcon className='text-emerald-400'/>
+            </div>
+            <div>
+              <p className="text-slate-400 text-xs font-bold uppercase">Strategy</p>
+              <p className="font-bold capitalize text-lg">{currentGoal || 'Set Goal'}</p>
+            </div>
+        </Card>
+
+        {/* Body Metrics Card */}
+        <Card className="md:col-span-1">
+          <div className="flex items-center gap-3 mb-4">
+            <ScaleIcon className="text-indigo-500 w-5 h-5"/>
+            <h3 className="font-bold text-slate-800 dark:text-white">Body Metrics</h3>
+          </div>
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-500 font-medium">Weight</span>
+              <span className="font-bold text-slate-800 dark:text-white">{currentWeight ? `${currentWeight} kg` : '--'}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-slate-500 font-medium">Height</span>
+              <span className="font-bold text-slate-800 dark:text-white">{currentHeight ? `${currentHeight} cm` : '--'}</span>
+            </div>
+            {currentWeight && currentHeight && (
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                 <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-slate-500">Calculated BMI</span>
+                    <span className="text-lg font-black text-emerald-500">
+                        {(currentWeight / Math.pow(currentHeight / 100, 2)).toFixed(1)}
+                    </span>
+                 </div>
+              </div>
+            )}
+          </div>
+        </Card>
+{/* Find the card in your Dashboard.tsx that holds the chart */}
+
+<Card className="md:col-span-2 min-h-[350px] flex flex-col">
+  <h3 className="font-bold mb-4">Weekly Progress</h3>
+
+  {allFoodLogs && allActivityLogs ? (
+    <div className="w-full h-[300px] min-w-0">
+      <CaloriesChart />
+    </div>
+  ) : (
+    <div className="h-[300px] flex items-center justify-center">
+      Loading...
+    </div>
+  )}
+</Card>
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
